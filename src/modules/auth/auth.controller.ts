@@ -1,5 +1,6 @@
 import {
   Controller,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -20,7 +21,7 @@ export class AuthController {
   // @UseGuards(LocalAuthGuard)
   @Post('login')
   async Login(@Body() loginDto: LoginDto) {
-    return await this.authService.signIn(loginDto.username, loginDto.password);
+    return await this.authService.signIn(loginDto.email, loginDto.password);
   }
 
   @Post('register')
