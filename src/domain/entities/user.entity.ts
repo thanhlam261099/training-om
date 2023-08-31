@@ -1,33 +1,48 @@
-import { Role } from 'src/common/enums/role.enum';
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { IsNotEmpty } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { RoleEntity } from './role.entity';
 
-@Entity('user')
+@Entity('users')
 export class UserEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
   @Column()
+  @IsNotEmpty()
   email: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @Column()
+  @IsNotEmpty()
   username: string;
 
   @Column()
+  @IsNotEmpty()
   password: string;
 
-  @Column({ default: 'false' })
-  isAdmin: boolean;
+  @Column({ type: 'boolean', default: true })
+  @Expose()
+  isPending?: boolean;
+
+  @Column({ type: 'boolean', default: true })
+  @Expose()
+  isDisable?: boolean;
+
+  @ManyToMany(() => RoleEntity, (role) => role.users)
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'role_id',
+    },
+  })
+  roles: RoleEntity[];
 }

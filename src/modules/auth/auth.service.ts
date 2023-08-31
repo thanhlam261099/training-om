@@ -10,6 +10,7 @@ import { UserEntity } from 'src/domain/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { UserNotFoundExeption } from 'src/common/exeptions/UserNotFound.exeption';
 
 @Injectable()
 export class AuthService {
@@ -19,11 +20,11 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
-  async signIn(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findUserByUsername(username);
+  async signIn(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findUserByEmail(email);
     // console.log('user', user.username);
     if (!user) {
-      throw new UnauthorizedException('Invalid username');
+      throw new UnauthorizedException('Invalid email');
     }
 
     const isPasswordValid = await bcrypt.compare(pass, user.password);
@@ -53,10 +54,10 @@ export class AuthService {
   async registerUser(registerUserDto: RegisterDto): Promise<UserEntity> {
     const { username, email, password } = registerUserDto;
     const existingUser = await this.userRepository.findOne({
-      where: { username },
+      where: { email },
     });
     if (existingUser) {
-      throw new ConflictException('username already exists');
+      throw new ConflictException('email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -67,5 +68,15 @@ export class AuthService {
     });
 
     return this.userRepository.save(newUser);
+  }
+
+  async changePassword(userId: string, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new UserNotFoundExeption();
+    }
+
+    user.password = newPassword;
+    await this.userRepository.save(user);
   }
 }
