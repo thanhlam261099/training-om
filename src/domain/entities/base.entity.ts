@@ -1,19 +1,16 @@
 import { IsUUID } from 'class-validator';
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 
-export class BaseEntity {
+export abstract class IdentityEntity {
   @PrimaryGeneratedColumn('uuid')
-  @IsUUID()
-  id: string = uuidv4();
-
+  id: string;
+}
+export abstract class BaseEntity extends IdentityEntity {
   @CreateDateColumn()
   createdAt?: Date;
 
@@ -25,14 +22,4 @@ export class BaseEntity {
 
   @Column({ nullable: true, default: 'ADMIN' })
   updatedBy?: string;
-
-  @BeforeInsert()
-  public setCreateDate(): void {
-    this.createdAt = new Date();
-  }
-
-  @BeforeUpdate()
-  public setUpdateDate(): void {
-    this.updatedAt = new Date();
-  }
 }

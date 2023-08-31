@@ -1,4 +1,3 @@
-import { Exclude, Expose } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -7,7 +6,6 @@ import {
   Length,
 } from 'class-validator';
 export class CreateUserDto {
-  @Expose()
   @IsNotEmpty()
   @IsString()
   @Length(1, 20, {
@@ -15,14 +13,13 @@ export class CreateUserDto {
   })
   username: string;
 
-  @Expose()
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
-  @Exclude()
+  @IsOptional()
   password: string;
 
-  @IsOptional()
-  isAdmin: boolean;
+  @IsNotEmpty()
+  roleIds: string[];
 }
