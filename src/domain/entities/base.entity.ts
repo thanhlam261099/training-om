@@ -16,10 +16,4 @@ export abstract class BaseEntity extends IdentityEntity {
 
   @UpdateDateColumn()
   updatedAt?: Date;
-
-  @Column({ nullable: true, default: 'ADMIN' })
-  createdBy?: string;
-
-  @Column({ nullable: true, default: 'ADMIN' })
-  updatedBy?: string;
 }
