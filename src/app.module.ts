@@ -4,9 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { config } from 'dotenv';
-import { RoleModule } from './role/role.module';
-import { RoleModule } from './modules/role/role/role.module';
 import { RoleModule } from './modules/role/role.module';
+import { PermissionsService } from './modules/permissions/permissions.service';
+import { PermissionsController } from './modules/permissions/permissions.controller';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 
 config();
 @Module({
@@ -26,6 +27,7 @@ config();
     UsersModule,
     AuthModule,
     RoleModule,
+    PermissionsModule,
   ],
 })
 export class AppModule {}

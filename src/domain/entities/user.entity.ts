@@ -33,7 +33,7 @@ export class UserEntity extends BaseEntity {
   @Expose()
   isDisable?: boolean;
 
-  @ManyToMany(() => RoleEntity, (role) => role.users)
+  @ManyToMany(() => RoleEntity, (role) => role.users, { cascade: true })
   @JoinTable({
     name: 'user_roles',
     joinColumn: {

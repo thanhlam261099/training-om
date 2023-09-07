@@ -8,13 +8,10 @@ import { RoleEntity } from './role.entity';
 export class PermissionEntity extends BaseEntity {
   @Column({ unique: true })
   @IsUppercase()
-  name: string;
+  permissionName: string;
 
-  @Expose()
+  @Column({ nullable: true })
   description: string;
-
-  @Column()
-  deletedAt?: Date;
 
   @ManyToMany(() => RoleEntity, (role) => role.permissions)
   roles: RoleEntity[];

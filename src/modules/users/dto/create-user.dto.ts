@@ -5,6 +5,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
+import { CreateRoleDto } from 'src/modules/role/dto/create-role.dto';
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
@@ -21,5 +22,5 @@ export class CreateUserDto {
   password: string;
 
   @IsNotEmpty()
-  roleIds: string[];
+  roles: CreateRoleDto[];
 }
