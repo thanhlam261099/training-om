@@ -4,7 +4,7 @@ import { PermissionEntity } from 'src/domain/entities';
 import { In, Repository } from 'typeorm';
 import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { plainToInstance } from 'class-transformer';
-import { GetAllPermissionDto } from './dto/get-all-permission.dto';
+import { GetAllPermissionDto } from './dto/get-permission.dto';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 
@@ -55,7 +55,6 @@ export class PermissionsService {
     }
 
     await this.permissionRepository.remove(permission);
-    return 'Permission deleted';
   }
 
   async getPermissionsByIds(permissionIds: string[]) {
@@ -84,7 +83,7 @@ export class PermissionsService {
     });
 
     if (existingPermissionName) {
-      throw new ConflictException('Permission name already exist');
+      throw new ConflictException('Permission name already exist!');
     }
 
     const permissionUpdate = {

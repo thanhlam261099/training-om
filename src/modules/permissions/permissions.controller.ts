@@ -9,11 +9,18 @@ import {
   Delete,
   ParseUUIDPipe,
   Put,
-  Res,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { CreatePermissionsDto } from './dto/create-permissions.dto';
+import {
+  CreatePermissionResDto,
+  CreatePermissionsDto,
+} from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { ResponseObject } from 'src/common/dto/respond-object.dto';
+import {
+  GetAllPermissionDto,
+  GetPermissionDetailDto,
+} from './dto/get-permission.dto';
 
 @Controller('permissions')
 @UsePipes(ValidationPipe)
@@ -21,35 +28,47 @@ export class PermissionsController {
   constructor(private readonly permissionService: PermissionsService) {}
 
   @Post('create')
-  async createPermission(@Body() createPermissionsDto: CreatePermissionsDto) {
-    return this.permissionService.createPermission(createPermissionsDto);
+  async createPermission(
+    @Body() createPermissionsDto: CreatePermissionsDto,
+  ): Promise<ResponseObject<CreatePermissionResDto>> {
+    const result = await this.permissionService.createPermission(
+      createPermissionsDto,
+    );
+    return ResponseObject.success(result, 'Created');
   }
 
   @Get()
-  async getAllPermission() {
-    return this.permissionService.getAllPermissions();
+  async getAllPermission(): Promise<ResponseObject<GetAllPermissionDto[]>> {
+    const result = await this.permissionService.getAllPermissions();
+    return ResponseObject.success<GetAllPermissionDto[]>(
+      result,
+      'Get all permission successfully',
+    );
   }
 
   @Get(':id')
-  async getPermissionById(@Param('id', ParseUUIDPipe) permissionId: string) {
-    return await this.permissionService.getPermissionById(permissionId);
+  async getPermissionById(
+    @Param('id', ParseUUIDPipe) permissionId: string,
+  ): Promise<ResponseObject<GetPermissionDetailDto>> {
+    const result = await this.permissionService.getPermissionById(permissionId);
+    return ResponseObject.success(result, 'Ok');
   }
 
   @Delete(':id')
   async deletePermission(@Param('id', ParseUUIDPipe) permissionId: string) {
-    return await this.permissionService.deletePermission(permissionId);
+    await this.permissionService.deletePermission(permissionId);
+    return ResponseObject.success<null>(null, 'Delete permission successfully');
   }
 
   @Put(':id')
   async updatePermission(
-    @Param('id') permissionId: string,
+    @Param('id', ParseUUIDPipe) permissionId: string,
     @Body() updatePermissionDto: UpdatePermissionDto,
-    @Res() res,
-  ) {
-    await this.permissionService.updatePermission(
+  ): Promise<ResponseObject<CreatePermissionsDto>> {
+    const result = await this.permissionService.updatePermission(
       permissionId,
       updatePermissionDto,
     );
-    return res.status(200).json('Ok');
+    return ResponseObject.success(result, 'Update permission successfully');
   }
 }

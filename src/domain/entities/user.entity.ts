@@ -1,11 +1,4 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { IsNotEmpty } from 'class-validator';
 import { Expose } from 'class-transformer';

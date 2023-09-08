@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from './../../users/dto/change-password.dto';
 import { Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 
