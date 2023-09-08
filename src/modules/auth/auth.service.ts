@@ -20,14 +20,14 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
-  async signIn(email: string, pass: string): Promise<any> {
+  async login(loginDto: LoginDto): Promise<any> {
+    const { email, password } = loginDto;
     const user = await this.usersService.findUserByEmail(email);
-    // console.log('user', user.username);
     if (!user) {
       throw new UnauthorizedException('Invalid email');
     }
 
-    const isPasswordValid = await bcrypt.compare(pass, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
@@ -37,19 +37,6 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
-
-  // async registerUser(registerDto: RegisterDto): Promise<UserEntity> {
-  //   const { username } = registerDto;
-  // const existingUser = await this.userRepository.findOne({
-  //   where: { username },
-  // });
-  // if (existingUser) {
-  //   throw new ConflictException('username already exists');
-  // }
-  //   const user = new UserEntity();
-  //   Object.assign(user, registerDto);
-  //   return await this.userRepository.save(user);
-  // }
 
   async registerUser(registerUserDto: RegisterDto): Promise<UserEntity> {
     const { username, email, password } = registerUserDto;
@@ -70,13 +57,13 @@ export class AuthService {
     return this.userRepository.save(newUser);
   }
 
-  async changePassword(userId: string, newPassword: string): Promise<void> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new UserNotFoundExeption();
-    }
+  // async changePassword(userId: string, newPassword: string): Promise<void> {
+  //   const user = await this.userRepository.findOne({ where: { id: userId } });
+  //   if (!user) {
+  //     throw new UserNotFoundExeption();
+  //   }
 
-    user.password = newPassword;
-    await this.userRepository.save(user);
-  }
+  //   user.password = newPassword;
+  //   await this.userRepository.save(user);
+  // }
 }

@@ -1,15 +1,20 @@
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/domain/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { UserNotFoundExeption } from 'src/common/exeptions/UserNotFound.exeption';
-import { GetAllDto } from './dto/get-all-users.dto';
+import { GetAllUserDto } from './dto/get-users.dto';
 import { RoleEntity } from 'src/domain/entities';
 import { DEFAULT_PASSWORD } from 'src/common/constants';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -47,17 +52,16 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers(): Promise<GetAllDto[]> {
+  async getAllUsers(): Promise<GetAllUserDto[]> {
     const users: UserEntity[] = await this.userRepository.find({
       relations: {
         roles: true,
       },
     });
 
-    return plainToInstance(GetAllDto, users, {
+    return plainToInstance(GetAllUserDto, users, {
       excludeExtraneousValues: true,
     });
-    // return users;
   }
 
   async findUserByUsername(username: string) {
@@ -94,21 +98,41 @@ export class UsersService {
     return await this.userRepository.save(userUpdate);
   }
 
-  async deleteUser(userId: string) {
+  async deleteUser(userId: string): Promise<void> {
     const user = await this.findUserById(userId);
     if (!user) {
       throw new UserNotFoundExeption();
     }
 
     await this.userRepository.remove(user);
-    return 'User deleted';
   }
 
-  async changePassword(userId: string, newPassword: string): Promise<void> {
+  async comparePasswords(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    return isMatch;
+  }
+
+  async changePassword(
+    userId: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    const { oldPassword, newPassword } = changePasswordDto;
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new UserNotFoundExeption();
     }
+
+    const isOldPasswordValid = await this.comparePasswords(
+      oldPassword,
+      user.password,
+    );
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('incorrect old password');
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
