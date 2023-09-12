@@ -5,8 +5,6 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from 'src/domain/entities/user.entity';
-import { PassportModule } from '@nestjs/passport';
-// import { LocalStrategy } from 'src/common/strategy/local-strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from 'src/common/strategy/jwt-strategy';
 import { UsersModule } from '../users/users.module';

@@ -1,17 +1,21 @@
 import { Expose } from 'class-transformer';
-export class GetAllRoleDto {
+import { PermissionEntity } from 'src/domain/entities';
+export class GetRoleDto {
   @Expose()
   id: string;
 
   @Expose()
-  name: string;
+  roleName: string;
 
   @Expose()
   description: string;
 
   @Expose()
-  createdAt: Date;
+  createdAt?: Date;
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  permissions: PermissionEntity[];
 }

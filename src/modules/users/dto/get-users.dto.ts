@@ -1,6 +1,5 @@
-import { IsEmail } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { GetAllRoleDto } from 'src/modules/role/dto/get-role.dto';
+import { RoleEntity } from 'src/domain/entities';
 
 export class GetAllUserDto {
   @Expose()
@@ -25,7 +24,7 @@ export class GetAllUserDto {
   isDisable: boolean;
 
   @Expose()
-  roles: GetAllRoleDto[];
+  roles: RoleEntity[];
 }
 
 export class GetUserDetailDto {
@@ -37,4 +36,19 @@ export class GetUserDetailDto {
 
   @Expose()
   username: string;
+
+  @Expose()
+  createdAt: Date;
+
+  @Expose()
+  updatedAt: Date;
+
+  @Expose()
+  isPending: boolean;
+
+  @Expose()
+  isDisable: boolean;
+
+  @Expose()
+  roles: RoleEntity[];
 }

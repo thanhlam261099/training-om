@@ -1,6 +1,8 @@
 import { IsEmail, IsOptional } from 'class-validator';
+import { RoleEntity } from 'src/domain/entities';
 
 export class UpdateUserDto {
+  id: string;
   @IsOptional()
   username?: string;
 
@@ -9,5 +11,5 @@ export class UpdateUserDto {
   email?: string;
 
   @IsOptional()
-  roleIds?: string[];
+  roles: RoleEntity[];
 }

@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -11,20 +12,22 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { UserNotFoundExeption } from 'src/common/exeptions/UserNotFound.exeption';
-import { GetAllUserDto } from './dto/get-users.dto';
-import { RoleEntity } from 'src/domain/entities';
+import { GetAllUserDto, GetUserDetailDto } from './dto/get-users.dto';
 import { DEFAULT_PASSWORD } from 'src/common/constants';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class UsersService {
+  roleRepository: any;
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly roleService: RoleService,
   ) {}
 
   async createUser(createUser: CreateUserDto): Promise<UserEntity> {
-    const { username, email } = createUser;
+    const { username, email, roles } = createUser;
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
@@ -34,22 +37,31 @@ export class UsersService {
 
     const defaultPassword = DEFAULT_PASSWORD;
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-    const newUser = this.userRepository.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
+    const user = new UserEntity();
+    const role = roles.map((e) => e.id);
+    const roleList = await this.roleService.getRoleByIds(role);
 
+    (user.username = username),
+      (user.email = email),
+      (user.password = hashedPassword),
+      (user.roles = roleList);
+
+    const newUser = this.userRepository.create(user);
     return this.userRepository.save(newUser);
   }
 
-  async findUserById(userId: string) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  async findUserById(userId: string): Promise<GetUserDetailDto> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { roles: true },
+    });
 
     if (!user) {
       throw new UserNotFoundExeption();
     }
-    return user;
+    return plainToInstance(GetUserDetailDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async getAllUsers(): Promise<GetAllUserDto[]> {
@@ -72,41 +84,36 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async updateUser(userId: string, updateUserDto: UpdateUserDto) {
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserEntity> {
     const user = await this.findUserById(userId);
     if (!user) {
       throw new UserNotFoundExeption();
     }
 
-    const { email } = updateUserDto;
-
-    const existingEmail = await this.userRepository.findOne({
-      where: { email },
-    });
-    if (existingEmail) {
-      throw new ConflictException('Email already exist');
+    Object.assign(user, updateUserDto);
+    if (updateUserDto.id) {
+      const role = await this.roleRepository.findOne(updateUserDto.id);
+      if (!role) {
+        throw new NotFoundException('Role not found');
+      }
+      user.roles = role;
     }
-
-    const userUpdate: Partial<UserEntity> = {
-      ...user,
-      ...updateUserDto,
-    };
-
-    // if(updateUserDto.roleIds) {
-    //   const roles: RoleEntity[] =
-    // }
-    return await this.userRepository.save(userUpdate);
+    return this.userRepository.save(user);
   }
 
-  async deleteUser(userId: string): Promise<void> {
-    const user = await this.findUserById(userId);
+  async deleteUser(id: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: id },
+      relations: ['roles'],
+    });
     if (!user) {
-      throw new UserNotFoundExeption();
+      throw new NotFoundException('User not found');
     }
-
     await this.userRepository.remove(user);
   }
-
   async comparePasswords(
     password: string,
     hashedPassword: string,

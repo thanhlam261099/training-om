@@ -1,12 +1,14 @@
+import { Expose } from 'class-transformer';
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import { PermissionEntity } from 'src/domain/entities';
 
 export class CreateRoleDto {
   @IsNotEmpty()
-  name: string;
+  roleName: string;
 
   @IsNotEmpty()
   description: string;
 
   @IsOptional()
-  permissionIds: string[];
+  permissions: PermissionEntity[];
 }

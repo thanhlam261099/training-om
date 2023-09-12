@@ -2,29 +2,21 @@ import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
 import { PermissionEntity } from './permission.entity';
+import { Expose } from 'class-transformer';
 
 @Entity('roles')
 export class RoleEntity extends BaseEntity {
   @Column({ unique: true })
-  name: string;
+  @Expose()
+  roleName: string;
 
   @Column()
   description: string;
 
-  @ManyToMany(() => PermissionEntity, (permission) => permission.roles, {
-    cascade: true,
+  @ManyToMany(() => PermissionEntity, {
+    eager: true,
   })
-  @JoinTable({
-    name: 'role_permissions',
-    joinColumn: {
-      name: 'role_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'permission_id',
-      referencedColumnName: 'id',
-    },
-  })
+  @JoinTable()
   permissions: PermissionEntity[];
 
   @ManyToMany(() => UserEntity, (user) => user.roles)

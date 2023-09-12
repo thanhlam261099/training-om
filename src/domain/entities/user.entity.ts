@@ -1,7 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { IsNotEmpty } from 'class-validator';
-import { Expose } from 'class-transformer';
 import { RoleEntity } from './role.entity';
 
 @Entity('users')
@@ -19,11 +18,9 @@ export class UserEntity extends BaseEntity {
   password: string;
 
   @Column({ type: 'boolean', default: true })
-  @Expose()
   isPending?: boolean;
 
   @Column({ type: 'boolean', default: true })
-  @Expose()
   isDisable?: boolean;
 
   @ManyToMany(() => RoleEntity, (role) => role.users, { cascade: true })
