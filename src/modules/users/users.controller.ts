@@ -20,12 +20,17 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseObject } from 'src/common/dto/respond-object.dto';
 import { GetAllUserDto, GetUserDetailDto } from './dto/get-users.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from 'src/common/enum/role.enum';
+import { RolesGuard } from 'src/common/guard/role-guard/role.guard';
 
 @Controller('users')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @UsePipes(ValidationPipe)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
+
+  @Roles(Role.ADMIN)
   @Post('create')
   async createUser(
     @Body() createUserDto: CreateUserDto,
@@ -33,13 +38,14 @@ export class UsersController {
     const result = await this.userService.createUser(createUserDto);
     return ResponseObject.success(result, 'Created');
   }
-
+  @Roles(Role.ADMIN)
   @Get()
   async getAllUsers(): Promise<ResponseObject<GetAllUserDto[]>> {
     const result = await this.userService.getAllUsers();
     return ResponseObject.success<GetAllUserDto[]>(result, 'Ok');
   }
 
+  @Roles(Role.USER, Role.ADMIN)
   @Get(':id')
   @UseFilters(HttpExceptionFilter)
   async findUserById(

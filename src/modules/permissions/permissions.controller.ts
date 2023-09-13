@@ -40,10 +40,7 @@ export class PermissionsController {
   @Get()
   async getAllPermission(): Promise<ResponseObject<GetAllPermissionDto[]>> {
     const result = await this.permissionService.getAllPermissions();
-    return ResponseObject.success<GetAllPermissionDto[]>(
-      result,
-      'Get all permission successfully',
-    );
+    return ResponseObject.success<GetAllPermissionDto[]>(result, 'Get all ok');
   }
 
   @Get(':id')
@@ -57,7 +54,7 @@ export class PermissionsController {
   @Delete(':id')
   async deletePermission(@Param('id', ParseUUIDPipe) permissionId: string) {
     await this.permissionService.deletePermission(permissionId);
-    return ResponseObject.success<null>(null, 'Delete permission successfully');
+    return ResponseObject.success<null>(null, 'Deleted');
   }
 
   @Put(':id')
@@ -69,6 +66,6 @@ export class PermissionsController {
       permissionId,
       updatePermissionDto,
     );
-    return ResponseObject.success(result, 'Update permission successfully');
+    return ResponseObject.success(result, 'Updated');
   }
 }

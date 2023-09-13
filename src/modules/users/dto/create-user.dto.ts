@@ -1,6 +1,12 @@
 import { Expose } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
-import { CreateRoleDto } from 'src/modules/role/dto/create-role.dto';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
+import { RoleEntity } from 'src/domain/entities';
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
@@ -16,8 +22,8 @@ export class CreateUserDto {
   // @IsOptional()
   // password: string;
 
-  @IsNotEmpty()
-  roles: CreateRoleDto[];
+  @IsOptional()
+  roles: RoleEntity[];
 }
 
 export class CreateUserResDto {
