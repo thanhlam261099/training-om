@@ -65,7 +65,10 @@ export class RoleService {
     });
   }
 
-  async updateRole(roleId: string, updateRoleDto: UpdateRoleDto) {
+  async updateRole(
+    roleId: string,
+    updateRoleDto: UpdateRoleDto,
+  ): Promise<UpdateRoleDto> {
     const role = await this.getRoleById(roleId);
     if (!role) {
       throw new NotFoundException();

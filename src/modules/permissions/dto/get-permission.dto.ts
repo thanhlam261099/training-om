@@ -13,6 +13,8 @@ export class GetPermissionDetailDto {
 
 export class GetAllPermissionDto {
   @Expose()
+  id: string;
+  @Expose()
   // data: GetPermissionDetailDto[];
   permissionName: string;
   @Expose()
