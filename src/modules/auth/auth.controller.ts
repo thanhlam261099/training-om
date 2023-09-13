@@ -1,7 +1,17 @@
-import { Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+  Response,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Body } from '@nestjs/common';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { GoogleOAuthGuard } from 'src/common/guard/google-auth/google-oauth.guard';
 
 @Controller('auth')
 @UsePipes(ValidationPipe)
@@ -16,5 +26,16 @@ export class AuthController {
   @Post('register')
   async Register(@Body() registerDto: RegisterDto) {
     return this.authService.registerUser(registerDto);
+  }
+
+  @Get('google')
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Request() req) {}
+
+  @Get('google-redirect')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Request() req, @Response() res) {
+    console.log(req);
+    res.redirect('localhost:3001');
   }
 }
