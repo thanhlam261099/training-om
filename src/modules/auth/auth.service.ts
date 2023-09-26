@@ -2,6 +2,8 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -10,7 +12,7 @@ import { UserEntity } from 'src/domain/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserNotFoundExeption } from 'src/common/exeptions/UserNotFound.exeption';
+import { generateFromEmail } from 'unique-username-generator';
 
 @Injectable()
 export class AuthService {
@@ -20,9 +22,10 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
+
   async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
-    const user = await this.usersService.findUserByEmail(email);
+    const user = await this.usersService.getUserInfo(email);
     if (!user) {
       throw new UnauthorizedException('Invalid email');
     }
@@ -31,7 +34,8 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-    const payload = { sub: user.id, username: user.username };
+    const payload = { sub: user.id, user };
+    console.log('usinfo', user);
     return {
       user,
       access_token: await this.jwtService.signAsync(payload),
@@ -57,13 +61,41 @@ export class AuthService {
     return this.userRepository.save(newUser);
   }
 
-  // async changePassword(userId: string, newPassword: string): Promise<void> {
-  //   const user = await this.userRepository.findOne({ where: { id: userId } });
-  //   if (!user) {
-  //     throw new UserNotFoundExeption();
-  //   }
+  generateJwt(payload) {
+    return this.jwtService.sign(payload);
+  }
 
-  //   user.password = newPassword;
-  //   await this.userRepository.save(user);
-  // }
+  async registerGoogleUser(user: RegisterDto) {
+    try {
+      const newUser = this.userRepository.create(user);
+      newUser.username = generateFromEmail(user.email, 5);
+
+      await this.userRepository.save(newUser);
+      console.log('aaaaa', newUser);
+
+      return this.generateJwt({
+        sub: newUser,
+        email: newUser.email,
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async googleLogin(user: any) {
+    if (!user) {
+      throw new BadRequestException('Unauthenticated');
+    }
+
+    const userExists = await this.usersService.getUserInfo(user.email);
+
+    if (!userExists) {
+      return this.registerUser(user);
+    }
+
+    return {
+      sub: userExists.id,
+      email: userExists.email,
+    };
+  }
 }

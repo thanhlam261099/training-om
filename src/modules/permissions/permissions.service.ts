@@ -46,10 +46,8 @@ export class PermissionsService {
   }
 
   async deletePermission(permissionId: string) {
-    const permission = await this.permissionRepository.findOne({
-      where: { id: permissionId },
-    });
-
+    const permission = await this.getPermissionById(permissionId);
+    console.log('sẻvice', permission);
     if (!permission) {
       throw new NotFoundException('permission not found');
     }
