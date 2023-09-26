@@ -13,9 +13,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { UserNotFoundExeption } from 'src/common/exeptions/UserNotFound.exeption';
 import { GetAllUserDto, GetUserDetailDto } from './dto/get-users.dto';
-import { DEFAULT_PASSWORD } from 'src/common/constants';
+import { DEFAULT_PASSWORD } from 'src/common/constants/constants';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RoleService } from '../role/role.service';
+import { PermissionEntity, RoleEntity } from 'src/domain/entities';
 
 @Injectable()
 export class UsersService {
@@ -53,7 +54,7 @@ export class UsersService {
   async findUserById(userId: string): Promise<GetUserDetailDto> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: { roles: true },
+      relations: ['roles', 'roles.permissions'],
     });
 
     if (!user) {
@@ -80,9 +81,23 @@ export class UsersService {
     return this.userRepository.findOne({ where: { username } });
   }
 
-  async findUserByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+  async getUserInfo(email: string) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'role')
+      .leftJoinAndSelect('role.permissions', 'permission')
+      .where('user.email = :email', { email })
+      .getOne();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
+
+  // async getUserInfo(email: string) {
+  //   return this.userRepository.findOne({ where: { email } });
+  // }
 
   async updateUser(
     userId: string,
@@ -144,5 +159,22 @@ export class UsersService {
 
     user.password = hashedPassword;
     await this.userRepository.save(user);
+  }
+
+  async getAllPermissions(userId: string): Promise<PermissionEntity[]> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['roles', 'roles.permissions'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const allPermissions: PermissionEntity[] = user.roles.flatMap(
+      (role: RoleEntity) => role.permissions,
+    );
+
+    return allPermissions;
   }
 }

@@ -53,6 +53,7 @@ export class PermissionsController {
 
   @Delete(':id')
   async deletePermission(@Param('id', ParseUUIDPipe) permissionId: string) {
+    console.log('...zooooooooooooooo', permissionId);
     await this.permissionService.deletePermission(permissionId);
     return ResponseObject.success<null>(null, 'Deleted');
   }

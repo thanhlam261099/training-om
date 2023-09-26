@@ -20,17 +20,16 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseObject } from 'src/common/dto/respond-object.dto';
 import { GetAllUserDto, GetUserDetailDto } from './dto/get-users.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/common/enum/role.enum';
 import { RolesGuard } from 'src/common/guard/role-guard/role.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { Permission } from 'src/common/constants/constants';
 
 @Controller('users')
-@UseGuards(JwtGuard, RolesGuard)
+// @UseGuards(JwtGuard, RolesGuard)
 @UsePipes(ValidationPipe)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
-  @Roles(Role.ADMIN)
   @Post('create')
   async createUser(
     @Body() createUserDto: CreateUserDto,
@@ -38,14 +37,15 @@ export class UsersController {
     const result = await this.userService.createUser(createUserDto);
     return ResponseObject.success(result, 'Created');
   }
-  @Roles(Role.ADMIN)
+
+  // @Permissions(Permission.READ_USER)
   @Get()
   async getAllUsers(): Promise<ResponseObject<GetAllUserDto[]>> {
     const result = await this.userService.getAllUsers();
     return ResponseObject.success<GetAllUserDto[]>(result, 'Ok');
   }
 
-  @Roles(Role.USER, Role.ADMIN)
+  @Permissions(Permission.READ_USER)
   @Get(':id')
   @UseFilters(HttpExceptionFilter)
   async findUserById(
@@ -55,6 +55,7 @@ export class UsersController {
     return ResponseObject.success(result);
   }
 
+  @Permissions(Permission.UPDATE_USER)
   @Put(':id')
   async updateUser(
     @Param('id', ParseUUIDPipe) userId: string,
@@ -64,6 +65,7 @@ export class UsersController {
     return ResponseObject.success(result, 'Updated');
   }
 
+  @Permissions(Permission.DELETE_USER)
   @Delete(':id')
   async deleteUser(
     @Param('id', ParseUUIDPipe) userId: string,
@@ -72,6 +74,7 @@ export class UsersController {
     return ResponseObject.success<null>(null, 'deleted');
   }
 
+  @Permissions(Permission.UPDATE_USER)
   @Put('change-password/:id')
   async changePassword(
     @Param('id', ParseUUIDPipe) userId: string,

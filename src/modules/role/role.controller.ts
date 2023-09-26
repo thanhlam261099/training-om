@@ -12,13 +12,19 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ResponseObject } from 'src/common/dto/respond-object.dto';
 import { GetRoleDto } from './dto/get-role.dto';
-import { RoleEntity } from 'src/domain/entities';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { Permission } from 'src/common/constants/constants';
+import { RolesGuard } from 'src/common/guard/role-guard/role.guard';
+import { JwtGuard } from 'src/common/guard/jwt-auth/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common/decorators';
 
+@UseGuards(JwtGuard, RolesGuard)
 @Controller('role')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
+  @Permissions(Permission.CREATE_ROLE)
   @Post('create')
   async createRole(
     @Body() createRoleDto: CreateRoleDto,
@@ -27,6 +33,7 @@ export class RoleController {
     return ResponseObject.success(result);
   }
 
+  @Permissions(Permission.READ_ROLE)
   @Get()
   async getAllRoles(): Promise<ResponseObject<GetRoleDto[]>> {
     const result = await this.roleService.getAllRoles();
