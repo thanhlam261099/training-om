@@ -25,7 +25,7 @@ import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { Permission } from 'src/common/constants/constants';
 
 @Controller('users')
-// @UseGuards(JwtGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @UsePipes(ValidationPipe)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
@@ -38,14 +38,14 @@ export class UsersController {
     return ResponseObject.success(result, 'Created');
   }
 
-  // @Permissions(Permission.READ_USER)
+  @Permissions(Permission.READ_USER)
   @Get()
   async getAllUsers(): Promise<ResponseObject<GetAllUserDto[]>> {
     const result = await this.userService.getAllUsers();
     return ResponseObject.success<GetAllUserDto[]>(result, 'Ok');
   }
 
-  @Permissions(Permission.READ_USER)
+  // @Permissions(Permission.READ_USER)
   @Get(':id')
   @UseFilters(HttpExceptionFilter)
   async findUserById(
@@ -65,7 +65,7 @@ export class UsersController {
     return ResponseObject.success(result, 'Updated');
   }
 
-  @Permissions(Permission.DELETE_USER)
+  // @Permissions(Permission.DELETE_USER)
   @Delete(':id')
   async deleteUser(
     @Param('id', ParseUUIDPipe) userId: string,
@@ -74,7 +74,7 @@ export class UsersController {
     return ResponseObject.success<null>(null, 'deleted');
   }
 
-  @Permissions(Permission.UPDATE_USER)
+  // @Permissions(Permission.UPDATE_USER)
   @Put('change-password/:id')
   async changePassword(
     @Param('id', ParseUUIDPipe) userId: string,

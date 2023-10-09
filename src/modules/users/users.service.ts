@@ -70,6 +70,9 @@ export class UsersService {
       relations: {
         roles: true,
       },
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return plainToInstance(GetAllUserDto, users, {
@@ -129,6 +132,7 @@ export class UsersService {
     }
     await this.userRepository.remove(user);
   }
+
   async comparePasswords(
     password: string,
     hashedPassword: string,
